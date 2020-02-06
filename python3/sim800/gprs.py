@@ -2,7 +2,6 @@ __author__ = 'Larry A. Hartman'
 __company__ = 'Janus Research'
 
 import logging
-import os
 import RPi.GPIO as GPIO
 import serial
 import socket
@@ -460,33 +459,12 @@ class Sim800(object):
         ser_err = self.port_open()
         http_cmd_err = True
 
-        file_size = os.path.getsize(file_url_local)
-
         if not ser_err:
 
             # Build connection and execute upload
-            host_name = socket.gethostname()
             http_cmd_err = self.http_start(
                 gprs_set_dict=gprs_set_dict
             )
-
-            if not http_cmd_err:
-
-                # Build content and HTML header, then combine and send
-                content_type = 'application/json'
-                json_str = '{' +\
-                    '"remote":"' + host_name + '",' +\
-                    '"file":"' + file_url_xmit + '",' +\
-                    '"size":"' + str(file_size) + '"' +\
-                    '}'
-                data_pkt = json_str.encode()
-
-                http_cmd_err = self.http_sendrecv(
-                    gprs_set_dict=gprs_set_dict,
-                    host_name=host_name,
-                    content_type=content_type,
-                    data_pkt=data_pkt
-                )
 
             if not http_cmd_err:
                 # Determine content type for HTML header and build
@@ -500,10 +478,9 @@ class Sim800(object):
                 with open(file=file_url_local, mode='rb') as text_file:
                     data_pkt = text_file.read()
 
-                xmit_file = host_name + '!' + file_url_xmit
                 http_cmd_err = self.http_sendrecv(
                     gprs_set_dict=gprs_set_dict,
-                    host_name=xmit_file,
+                    host_name=file_url_xmit,
                     content_type=content_type,
                     data_pkt=data_pkt
                 )
@@ -512,53 +489,6 @@ class Sim800(object):
             if not http_cmd_err:
                 http_cmd_err = self.http_stop()
             self.port_close()
-
-        else:
-            log = 'Failed to open serial port to SIM 800.'
-            logger.error(msg=log)
-            print(log)
-
-        return http_cmd_err, ser_err
-
-    def http_clearlist(
-        self,
-        gprs_set_dict: dict
-    ) -> [bool, bool]:
-        """
-        Clears http file upload list on server
-
-        :param gprs_set_dict: dict
-
-        :return http_cmd_err: bool
-        """
-        host_name = socket.gethostname()
-        ser_err = self.port_open()
-        http_cmd_err = True
-
-        if not ser_err:
-
-            # Build connection and execute upload
-            http_cmd_err = self.http_start(
-                gprs_set_dict=gprs_set_dict
-            )
-
-            # Build constant and HTML header, then combine and send
-            if not http_cmd_err:
-                content_type = 'application/json'
-                json_str = '{"remote":"list","file":"clear","size":"0"}'
-                data_pkt = json_str.encode()
-
-                http_cmd_err = self.http_sendrecv(
-                    gprs_set_dict=gprs_set_dict,
-                    host_name=host_name,
-                    content_type=content_type,
-                    data_pkt=data_pkt
-                )
-
-            # Send HTTP stop and close messages
-            if not http_cmd_err:
-                http_cmd_err = self.http_stop()
-            self.port.close()
 
         else:
             log = 'Failed to open serial port to SIM 800.'

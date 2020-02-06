@@ -8,6 +8,7 @@ if __name__ == '__main__':
     import logging
     import logging.config
     import os
+    import socket
     import sys
     import time as ttime
     from common import transmit
@@ -61,6 +62,7 @@ if __name__ == '__main__':
     #     )
 
     core_path_dict = core_cfg.get(attrib='core_path_dict')
+    host_name = socket.gethostname()
     while os.listdir(core_path_dict['xmit']):
         most_recent_url_str = max(
             glob.iglob(os.path.join(core_path_dict['xmit'] + '*')),
@@ -68,10 +70,11 @@ if __name__ == '__main__':
         )
         print(most_recent_url_str)
 
+        file_url_xmit = host_name + '_' + os.path.basename(most_recent_url_str)
         xmit_err = transmit.transmit_data(
             gprs_set_dict=gprs_cfg_dict,
             file_url_local=most_recent_url_str,
-            file_url_xmit=os.path.basename(most_recent_url_str)
+            file_url_xmit=file_url_xmit
         )
 
         if not xmit_err:

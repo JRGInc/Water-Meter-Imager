@@ -49,22 +49,6 @@ def transmit_data(
             logger.warning(msg=log)
             print(log)
 
-            log = 'Attempting to clear transmission list from server.'
-            logger.info(msg=log)
-            print(log)
-
-            time.sleep(3)
-            sim.reset()
-            clear_cmd_err, clear_ser_err = sim.http_clearlist(
-                gprs_set_dict=gprs_set_dict
-            )
-
-            # If can not clear list, something more
-            # significant is wrong, break all attempts to
-            # transmit.
-            # if clear_cmd_err:
-            #     break
-
         if not xmit_err and not ser_err:
             break
 
