@@ -1,12 +1,6 @@
-# 2019 Water Meter Code Base
+# Water Meter Imager
 
-This code library executes several functions:
-
-1. Train Inception v4 image classification model with TensorFlow on Ubuntu desktop computer with nVidia GPU
-2. Test Inception v4 image classification with TensorFlow on Ubuntu desktop computer with nVidia GPU
-3. Image capture, classification, and transmission on Raspberry PI with PiCamera v2
-4. Control stepper motor controller via Raspberry PI with TB6600 to rotate water meter shaft
-5. Image capture experimentation on Raspberry PI
+This code library captures and transmits images on Raspberry PI with PiCamera v2
 
 Create and download code to the following directory:
 
