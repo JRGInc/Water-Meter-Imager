@@ -37,7 +37,7 @@ class CaptureCfg(object):
         img_core_name = self.img_orig_dtg + '_' + self.img_seq
         img_name = img_core_name + '.jpg'
 
-        err_xmit_name = 'errors_' + img_core_name + '.txt'
+        err_xmit_name = 'errs_' + img_core_name + '.txt'
 
         self.img_url = os.path.join(
             core_path_dict['img'],

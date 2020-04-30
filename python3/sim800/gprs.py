@@ -6,6 +6,8 @@ import RPi.GPIO as GPIO
 import serial
 import socket
 import time as ttime
+import urllib.request
+import urllib.error
 
 logfile = 'januswm-transmit'
 logger = logging.getLogger(logfile)
@@ -459,6 +461,17 @@ class Sim800(object):
         ser_err = self.port_open()
         http_cmd_err = True
 
+        # Determine content type for HTML header and build
+        if file_url_xmit.split('.')[1] == 'txt':
+            content_type = 'text/plain'
+        elif file_url_xmit.split('.')[1] == 'log':
+            content_type = 'text/plain'
+        else:
+            content_type = 'application/octet-stream'
+
+        with open(file=file_url_local, mode='rb') as text_file:
+            data_pkt = text_file.read()
+
         if not ser_err:
 
             # Build connection and execute upload
@@ -467,17 +480,6 @@ class Sim800(object):
             )
 
             if not http_cmd_err:
-                # Determine content type for HTML header and build
-                if file_url_xmit.split('.')[1] == 'txt':
-                    content_type = 'text/plain'
-                elif file_url_xmit.split('.')[1] == 'log':
-                    content_type = 'text/plain'
-                else:
-                    content_type = 'application/octet-stream'
-
-                with open(file=file_url_local, mode='rb') as text_file:
-                    data_pkt = text_file.read()
-
                 http_cmd_err = self.http_sendrecv(
                     gprs_set_dict=gprs_set_dict,
                     host_name=file_url_xmit,
@@ -488,6 +490,14 @@ class Sim800(object):
             # Send HTTP stop and close messages
             if not http_cmd_err:
                 http_cmd_err = self.http_stop()
+            else:
+                http_cmd_err = self.http_upload_alt(
+                        gprs_set_dict=gprs_set_dict,
+                        data_pkt=data_pkt,
+                        content_type=content_type,
+                        file_url_xmit=file_url_xmit
+                )
+
             self.port_close()
 
         else:
@@ -543,3 +553,83 @@ class Sim800(object):
             print(log)
 
         return http_cmd_err, ser_err
+
+    @staticmethod
+    def http_upload_alt(
+        gprs_set_dict: dict,
+        data_pkt: bytes,
+        content_type: str,
+        file_url_xmit: str
+    ) -> bool:
+        """
+        Executes http file upload
+
+        :param gprs_set_dict: dict
+        :param data_pkt: bytes
+        :param content_type: str
+        :param file_url_xmit: str
+
+        :return http_cmd_err: bool
+        """
+        http_cmd_err = True
+
+        try:
+            response = urllib.request.urlopen(url='https://www.google.com')
+            if (int(response.getcode()) >= 200) and \
+                    (int(response.getcode()) < 300):
+                log = 'Internet found via non-cellular connection.'
+                logger.info(log)
+                print(log)
+
+                log = 'HTTP response code: {0}'.format(response.getcode())
+                logger.info(log)
+                print(log)
+
+                http_url = 'http://' + gprs_set_dict['addr'] + ':' \
+                           + str(gprs_set_dict['port']) + '/upload'
+                print(http_url)
+                method = 'POST'
+                handler = urllib.request.HTTPHandler()
+                opener = urllib.request.build_opener(handler)
+                request = urllib.request.Request(http_url, data_pkt)
+                request.add_header('Content-Type', content_type)
+                request.add_header('User-Agent', file_url_xmit)
+                request.get_method = lambda: method
+                response = opener.open(request)
+                if (int(response.getcode()) >= 200) and \
+                        (int(response.getcode()) < 300):
+                    http_cmd_err = False
+
+                    log = 'Data successfully posted.'
+                    logger.info(log)
+                    print(log)
+
+                    log = 'HTTP response code: {0}'.format(response.getcode())
+                    logger.info(log)
+                    print(log)
+
+        except urllib.error.HTTPError as exc:
+            log = 'Unsuccessful response from non-cellular connection.'
+            logger.warning(log)
+            print(log)
+
+            log = 'HTTP response code: {0}'.format(exc.getcode())
+            logger.warning(log)
+            print(log)
+
+        except urllib.error.URLError as exc:
+            log = 'Unsuccessful response from non-cellular connection.'
+            logger.warning(log)
+            print(log)
+
+            log = 'HTTP response code: {0}'.format(exc.reason)
+            logger.warning(log)
+            print(log)
+
+        except Exception as exc:
+            log = 'Unsuccessful response from non-cellular connection, ' + \
+                  'error unknown.'
+            logger.warning(log)
+            print(log)
+
+        return http_cmd_err

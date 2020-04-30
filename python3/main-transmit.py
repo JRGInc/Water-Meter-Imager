@@ -8,11 +8,12 @@ if __name__ == '__main__':
     import logging
     import logging.config
     import os
+    import shutil
     import socket
     import sys
     import time as ttime
     from common import transmit
-    from config.log import LogCfg
+    from config.log import LogCfg, LOGPATHWMCAPT, LOGPATHWMXMIT
     from config.core import CoreCfg
     from config.transmit import TransmitCfg
     from datetime import *
@@ -62,6 +63,36 @@ if __name__ == '__main__':
     #     )
 
     core_path_dict = core_cfg.get(attrib='core_path_dict')
+
+    # Put last several logs into transmission directory if they exist
+    max_history = 3
+    directories = [LOGPATHWMCAPT, LOGPATHWMXMIT]
+    for directory in directories:
+        count = 0
+        for logfile in sorted(os.listdir(directory)):
+            file_name, file_ext = os.path.splitext(logfile)
+            logfile_url = os.path.join(
+                directory,
+                logfile
+            )
+            xmit_dtg = datetime.today().strftime('%Y-%m-%d_%H%M')
+            if file_ext != '':
+                logfile = file_name + '_' + file_ext[1:]
+            else:
+                logfile = file_name + '_0'
+            log_name = 'logs_' + xmit_dtg + '_' + logfile + '.txt'
+            transmit_url = os.path.join(
+                core_path_dict['xmit'],
+                log_name
+            )
+            shutil.copyfile(
+                src=logfile_url,
+                dst=transmit_url
+            )
+            count += 1
+            if count >= max_history:
+                break
+
     host_name = socket.gethostname()
     while os.listdir(core_path_dict['xmit']):
         most_recent_url_str = max(

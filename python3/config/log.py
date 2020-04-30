@@ -4,18 +4,12 @@ __company__ = 'Janus Research'
 import os
 
 # Log paths and files
-LOGPATH = os.path.normpath(
-    os.getenv(
-        'JANUSWM_CORE_LOG_PATH',
-        '/var/log/JanusWM/'
-    )
-)
-januswm = os.path.join(LOGPATH, 'januswm')                      # Log file
-januswm_capture = os.path.join(LOGPATH, 'januswm-capture')      # Log file
-januswm_video = os.path.join(LOGPATH, 'januswm-video')          # Log file
-januswm_train = os.path.join(LOGPATH, 'januswm-train')          # Log file
-januswm_test = os.path.join(LOGPATH, 'januswm-test')          # Log file
-januswm_transmit = os.path.join(LOGPATH, 'januswm-transmit')    # Log file
+LOGPATHWM = os.path.normpath('/var/log/JanusWM/')
+LOGPATHWMCAPT = os.path.normpath('/var/log/JanusWM-capture/')
+LOGPATHWMXMIT = os.path.normpath('/var/log/JanusWM-transmit/')
+januswm = os.path.join(LOGPATHWM, 'januswm')                      # Log file
+januswm_capture = os.path.join(LOGPATHWMCAPT, 'januswm-capture')      # Log file
+januswm_transmit = os.path.join(LOGPATHWMXMIT, 'januswm-transmit')    # Log file
 
 
 class LogCfg(object):
@@ -48,21 +42,6 @@ class LogCfg(object):
                     'propagate': False,
                     'level': 'INFO',
                 },
-                'januswm-video': {
-                    'handlers': ['januswm-video'],
-                    'propagate': False,
-                    'level': 'INFO',
-                },
-                'januswm-train': {
-                    'handlers': ['januswm-train'],
-                    'propagate': False,
-                    'level': 'INFO',
-                },
-                'januswm-test': {
-                    'handlers': ['januswm-test'],
-                    'propagate': False,
-                    'level': 'INFO',
-                },
                 'januswm-transmit': {
                     'handlers': ['januswm-transmit'],
                     'propagate': False,
@@ -75,7 +54,7 @@ class LogCfg(object):
                     'formatter': 'verbose',
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': januswm,
-                    'maxBytes': 4096000,
+                    'maxBytes': 25000,
                     'backupCount': 100,
                 },
                 'januswm-capture': {
@@ -83,31 +62,7 @@ class LogCfg(object):
                     'formatter': 'verbose',
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': januswm_capture,
-                    'maxBytes': 4096000,
-                    'backupCount': 100,
-                },
-                'januswm-video': {
-                    'level': 'DEBUG',
-                    'formatter': 'verbose',
-                    'class': 'logging.handlers.RotatingFileHandler',
-                    'filename': januswm_video,
-                    'maxBytes': 4096000,
-                    'backupCount': 100,
-                },
-                'januswm-train': {
-                    'level': 'DEBUG',
-                    'formatter': 'verbose',
-                    'class': 'logging.handlers.RotatingFileHandler',
-                    'filename': januswm_train,
-                    'maxBytes': 4096000,
-                    'backupCount': 100,
-                },
-                'januswm-test': {
-                    'level': 'DEBUG',
-                    'formatter': 'verbose',
-                    'class': 'logging.handlers.RotatingFileHandler',
-                    'filename': januswm_test,
-                    'maxBytes': 4096000,
+                    'maxBytes': 25000,
                     'backupCount': 100,
                 },
                 'januswm-transmit': {
@@ -115,7 +70,7 @@ class LogCfg(object):
                     'formatter': 'verbose',
                     'class': 'logging.handlers.RotatingFileHandler',
                     'filename': januswm_transmit,
-                    'maxBytes': 4096000,
+                    'maxBytes': 25000,
                     'backupCount': 100,
                 }
             }

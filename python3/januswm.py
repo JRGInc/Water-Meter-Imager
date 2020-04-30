@@ -49,17 +49,12 @@ if __name__ == '__main__':
     log = 'Setting capture execution to every {0} minutes.'.format(img_capt_dict['exec_interval'])
     logger.info(msg=log)
 
-    # job_xmit = cron_sched.new(command='sudo python3 /opt/Janus/WM/python3/main-transmit.py')
-    # job_xmit.hour.every(xmit_exec_int / 60)
-    # job_xmit.minute.on(5)
-    # log = 'Setting transmit execution to every {0} hour(s).'.format(xmit_exec_int / 60)
-    # logger.info(msg=log)
-
-    # job_model = cron_sched.new(command='sudo python3 /opt/Janus/WM/python3/main-video.py')
-    # job_model.minute.every(1)
-    # log = 'Setting model execution to every minute.'.format(15)
-    # logger.info(msg=log)
-    print(log)
+    job_xmit = cron_sched.new(command='sudo python3 /opt/Janus/WM/python3/main-transmit.py')
+    # job_xmit.minute.every(3)
+    job_xmit.hour.every(xmit_exec_int / 60)
+    job_xmit.minute.on(25)
+    log = 'Setting transmit execution to every {0} hour(s).'.format(xmit_exec_int / 60)
+    logger.info(msg=log)
 
     cron_sched.write()
 
