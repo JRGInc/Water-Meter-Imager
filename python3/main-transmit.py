@@ -17,6 +17,7 @@ if __name__ == '__main__':
     from config.core import CoreCfg
     from config.transmit import TransmitCfg
     from datetime import *
+    from pathlib import Path
     from tendo import singleton
 
     # Configure logging
@@ -67,31 +68,45 @@ if __name__ == '__main__':
     # Put last several logs into transmission directory if they exist
     max_history = 3
     directories = [LOGPATHWMCAPT, LOGPATHWMXMIT]
-    for directory in directories:
-        count = 0
-        for logfile in sorted(os.listdir(directory)):
-            file_name, file_ext = os.path.splitext(logfile)
-            logfile_url = os.path.join(
-                directory,
-                logfile
+    try:
+        for directory in directories:
+            count = 0
+            paths = sorted(
+                Path(directory).iterdir(),
+                key=os.path.getmtime,
+                reverse=True
             )
-            xmit_dtg = datetime.today().strftime('%Y-%m-%d_%H%M')
-            if file_ext != '':
-                logfile = file_name + '_' + file_ext[1:]
-            else:
-                logfile = file_name + '_0'
-            log_name = 'logs_' + xmit_dtg + '_' + logfile + '.txt'
-            transmit_url = os.path.join(
-                core_path_dict['xmit'],
-                log_name
-            )
-            shutil.copyfile(
-                src=logfile_url,
-                dst=transmit_url
-            )
-            count += 1
-            if count >= max_history:
-                break
+            for logfile in paths:
+                file_name, file_ext = os.path.splitext(str(logfile))
+                file_name = os.path.basename(file_name)
+                logfile_url = os.path.join(
+                    directory,
+                    str(logfile)
+                )
+                xmit_dtg = datetime.today().strftime('%Y-%m-%d_%H%M')
+                if file_ext != '':
+                    logfile = file_name + '_' + file_ext[1:]
+                else:
+                    logfile = file_name + '_0'
+                log_name = 'logs_' + xmit_dtg + '_' + logfile + '.txt'
+                transmit_url = os.path.join(
+                    core_path_dict['xmit'],
+                    log_name
+                )
+                shutil.copyfile(
+                    src=logfile_url,
+                    dst=transmit_url
+                )
+                count += 1
+                if count >= max_history:
+                    break
+
+    except Exception as exc:
+        log = 'Failed to copy logs to transmission directory.'
+        logger.error(msg=log)
+        logger.error(msg=exc)
+        print(log)
+        print(exc)
 
     host_name = socket.gethostname()
     while os.listdir(core_path_dict['xmit']):
