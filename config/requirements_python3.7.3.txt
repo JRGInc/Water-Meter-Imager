@@ -4,7 +4,7 @@ gast==0.2.2
 Markdown==3.1
 opencv-contrib-python==4.1.0.25
 opencv-python==4.1.0.25
-Pillow==6.2.0
+Pillow==9.3.0
 pyserial==3.2.1
 python-crontab==2.3.6
 python-dateutil==2.8.0
